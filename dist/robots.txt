@@ -1,0 +1,5 @@
+User-Agent: *
+Allow: /
+
+Host: https://port-comfort.pro
+Sitemap: https://port-comfort.pro/sitemap.xml
