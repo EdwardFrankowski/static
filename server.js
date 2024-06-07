@@ -18,68 +18,78 @@ const redirects = [
         permanent: true,
     },
     {
-        source: '/booking',
-        destination: '/book-a-room?hotel_id=10970',
-        permanent: true,
-    },
-    {
         source: '/dolgosrochnoeprojivanie',
-        destination: '/book-a-room?hotel_id=20176',
+        destination: '/book-a-room?hotel_id=10970',
         permanent: true,
     },
     {
         source: '/port-comfort-by-the-gostiny-dvor',
-        destination: '/book-a-room?hotel_id=20776',
+        destination: '/book-a-room?hotel_id=20176',
         permanent: true,
     },
     {
         source: '/port-comfort-by-the-griboedov',
-        destination: '/book-a-room?hotel_id=10970',
+        destination: '/book-a-room?hotel_id=20776',
         permanent: true,
     },
     {
         source: '/port-comfort-on-ligovskiy',
-        destination: '/book-a-room?hotel_id=27469',
-        permanent: true,
-    },
-    {
-        source: '/port-comfort-by-moyka',
-        destination: '/book-a-room?hotel_id=32789',
-        permanent: true,
-    },
-    {
-        source: '/hotelsmoscow',
-        destination: '/book-a-room?hotel_id=21668',
-        permanent: true,
-    },
-    {
-        source: '/port-comfort-by-old-nevsky',
         destination: '/book-a-room?hotel_id=10970',
         permanent: true,
     },
     {
-        source: '/hotels',
+        source: '/port-comfort-by-moyka',
+        destination: '/book-a-room?hotel_id=27469',
+        permanent: true,
+    },
+    {
+        source: '/hotelsmoscow',
         destination: '/book-a-room?hotel_id=32789',
         permanent: true,
     },
     {
+        source: '/port-comfort-by-old-nevsky',
+        destination: '/book-a-room?hotel_id=21668',
+        permanent: true,
+    },
+    {
+        source: '/hotels',
+        destination: '/book-a-room?hotel_id=10970',
+        permanent: true,
+    },
+    {
         source: '/port-comfort-on-pokrovka',
-        destination: '/book-a-room?hotel_id=33783',
+        destination: '/book-a-room?hotel_id=32789',
         permanent: true,
     },
     {
         source: '/sennaya_square',
-        destination: '/book-a-room?hotel_id=27859',
+        destination: '/book-a-room?hotel_id=33783',
         permanent: true,
     },
     {
         source: '/port-comfort-by-smolnyy',
-        destination: 'https://port-comfort.pro/book-a-room?hotel_id=42043',
+        destination: '/book-a-room?hotel_id=27859',
+        permanent: true,
+    },
+    {
+        source: '/booking?hotel_id=42043',
+        destination: '/book-a-room?hotel_id=42043',
         permanent: true,
     },
     {
         source: '/port-comfort-on-moyka',
-        destination: 'https://port-comfort.pro/book-a-room?hotel_id=20176',
+        destination: 'https://port-comfort.pro/book-a-room?hotel_id=42043',
+        permanent: true,
+    },
+    {
+        source: '/booking?hotel_id=20176&room-type=145132',
+        destination: '/book-a-room?hotel_id=20176',
+        permanent: true,
+    },
+    {
+        source: '/booking',
+        destination: '/book-a-room?hotel_id=10970',
         permanent: true,
     },
     {
@@ -109,7 +119,7 @@ const redirects = [
     },
     {
         source: '/dogovor',
-        destination: '/',
+        destination: '/rules-of-accommodation',
         permanent: true,
     },
     {
