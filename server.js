@@ -73,17 +73,17 @@ const redirects = [
         permanent: true,
     },
     {
-        source: '/booking?hotel_id=42043',
+        source: '/booking/:hotel_id=42043',
         destination: '/book-a-room?hotel_id=42043',
         permanent: true,
     },
     {
         source: '/port-comfort-on-moyka',
-        destination: 'https://port-comfort.pro/book-a-room?hotel_id=42043',
+        destination: '/book-a-room?hotel_id=27469',
         permanent: true,
     },
     {
-        source: '/booking?hotel_id=20176&room-type=145132',
+        source: '/booking/:hotel_id=20176&room-type=145132',
         destination: '/book-a-room?hotel_id=20176',
         permanent: true,
     },
@@ -92,11 +92,11 @@ const redirects = [
         destination: '/book-a-room?hotel_id=10970',
         permanent: true,
     },
-    {
+/*    {
         source: '/transfer',
         destination: '/',
         permanent: true,
-    },
+    },*/
     {
         source: '/dopuslugi',
         destination: '/',
@@ -147,6 +147,7 @@ const redirects = [
         destination: '/',
         permanent: true,
     },
+
 ];
 
 redirects.forEach(redirect => {
