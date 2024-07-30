@@ -287,16 +287,35 @@ const redirects =  [
 ]
 
 app.use((req, res, next) => {
-    const { originalUrl } = req;
-    const redirect = redirects.find(r => originalUrl.startsWith(r.source));
+    const redirect = redirects.find(r => r.source === req.originalUrl);
+
+    const url = new URL(req.originalUrl, `http://${req.headers.host}`);
+    const hotelId = url.searchParams.get('hotel_id');
+    const queryParams = url.searchParams.toString();
+
+
+    switch (hotelId){
+        case '20176': return res.redirect(301, `/hotels/spb/gostiniy-dvor?${queryParams}`);
+        case '21668': return res.redirect(301, `/hotels/spb/old-nevskiy?${queryParams}`);
+        case '42043': return res.redirect(301, `/hotels/spb/angliyskiy?${queryParams}`);
+        case '20776': return res.redirect(301, `/hotels/spb/griboedov?${queryParams}`);
+        case '33783': return res.redirect(301, `/hotels/spb/sennaya-square?${queryParams}`);
+        case '10970': return res.redirect(301, `/hotels/spb/ligovskiy?${queryParams}`);
+        case '27469': return res.redirect(301, `/hotels/spb/moyka?${queryParams}`);
+        case '27859': return res.redirect(301, `/hotels/spb/smolnyy?${queryParams}`);
+        case '32789': return res.redirect(301, `/hotels/msk/pokrovka?${queryParams}`);
+    }
+
 
     if (redirect) {
-        const redirectTo = redirect.destination;
-
-        res.redirect(redirect.permanent ? 301 : 302, redirectTo);
-    } else {
-        next();
+        return res.redirect(301, redirect.destination);
     }
+
+    next();
+});
+
+app.use((req, res) => {
+    res.redirect('/');
 });
 
 app.post('/send-transfer-message', async (req, res) => {
