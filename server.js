@@ -280,7 +280,7 @@ const redirects =  [
         permanent: true,
     },
     {
-        source: "/book-a-room?book-a-room?hotel_id=27859",
+        source: "/book-a-room?hotel_id=27859",
         destination: "/hotels/spb/smolnyy",
         permanent: true,
     },
