@@ -284,6 +284,51 @@ const redirects =  [
         destination: "/hotels/spb/smolnyy",
         permanent: true,
     },
+    {
+        source: "/spb/griboedov",
+        destination: "/hotels/spb/griboedov",
+        permanent: true,
+    },
+    {
+        source: "/spb/smolnyy",
+        destination: "/hotels/spb/smolnyy",
+        permanent: true,
+    },
+    {
+        source: "/spb/old-nevskiy",
+        destination: "/hotels/spb/old-nevskiy",
+        permanent: true,
+    },
+    {
+        source: "/msk/pokrovka",
+        destination: "/hotels/msk/pokrovka",
+        permanent: true,
+    },
+    {
+        source: "/spb/moyka",
+        destination: "/hotels/spb/moyka",
+        permanent: true,
+    },
+    {
+        source: "/spb/ligovskiy",
+        destination: "/hotels/spb/ligovskiy",
+        permanent: true,
+    },
+    {
+        source: "/spb/sennaya-square",
+        destination: "/hotels/spb/sennaya-square",
+        permanent: true,
+    },
+    {
+        source: "/spb/gostiniy-dvor",
+        destination: "/hotels/spb/gostiniy-dvor",
+        permanent: true,
+    },
+    {
+        source: "/spb/angliyskiy",
+        destination: "/hotels/spb/angliyskiy",
+        permanent: true,
+    },
 ]
 
 app.use((req, res, next) => {

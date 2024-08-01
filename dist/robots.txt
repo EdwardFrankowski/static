@@ -4,6 +4,7 @@ Disallow: *?
 
 User-Agent: Yandex
 Clean-param: amp&bx_sender_conversion_id&dayVisited&disableGlobalInfoCollect&gcmes&gcmlg&gcpc&orderId&p&sa&source&spush&tl-draft&utm_device&utm_me&utm_medium&utm_position&utm_source&ved&yandex-source&ysclid&children-age&adults&date&nights&room-type&utm_campaign&lang&gp-auth&utm_referer&utm_ya_campaign&yabizcmpgn&utm_candidate&tpclid&room-type
+Clean-param: _ym_debug&hl&promo-code-plain&_ym_lang&tl-offer&tl-room&ubn&be-cur&be-lng&ubsign&googlesource&userdevice&tl-lng&tl-nights&tl-date&access-code-plain&tl-adults&tl-cur&special-offer&etext&id&_ym_status-check&gtm_debug&hotel_id
 
 Host: https://port-comfort.pro
 Sitemap: https://port-comfort.pro/sitemap.xml
