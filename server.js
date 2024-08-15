@@ -2,12 +2,31 @@ const express = require('express');
 const path = require('path');
 const fs = require('fs');
 const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
 
 const app = express();
 const port = process.env.PORT || 3000;
 
-app.use(express.static(path.join(__dirname, 'dist')));
 app.use(bodyParser.json());
+app.use(cookieParser());
+app.use(express.json());
+const utmMiddleware = (req, res, next) => {
+    const utmParams = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content'];
+    const utmData = {};
+
+    utmParams.forEach(param => {
+        if (req.query[param]) {
+            utmData[param] = req.query[param];
+        }
+    });
+
+    if (Object.keys(utmData).length > 0) {
+        res.cookie('utm', JSON.stringify(utmData), { maxAge: 24 * 60 * 60 * 1000 });
+    }
+
+    next();
+};
+app.use(utmMiddleware);
 
 const TELEGRAM_BOT_TOKEN = '7484491812:AAFj6wf3VQYoXy69UZMFtEu-DAc_rqOtsBw';
 const TELEGRAM_CHAT_ID = '-1001580200946';
@@ -57,6 +76,7 @@ const sendTransferMessage = async (message) => {
     return response.status === 200;
 };
 
+app.use(express.static(path.join(__dirname, 'dist')));
 
 const redirects =  [
     {
