@@ -76,6 +76,171 @@ const sendTransferMessage = async (message) => {
     return response.status === 200;
 };
 
+
+function extractRoomOccupancy(data) {
+    const result = {};
+
+    data.hotels.forEach(hotel => {
+        hotel.room_types.forEach(room => {
+            result[room.code] = room.max_occupancy;
+        });
+    });
+
+    return result;
+}
+
+const hotels = ["10970", "20776", "20176", "21668", "42043", "27469", "33783", "27859", "32789"];
+
+app.get('/getRoomTypes', async (req, res) => {
+    try {
+        const requests = hotels.map(hotelCode =>
+            fetch(`https://ibe.tlintegration.com/ChannelDistributionApi/BookingForm/hotel_info?language=ru-ru&hotels[0].code=${hotelCode}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json, text/plain, */*',
+                    'X-TravelLine-ApiKey': '4db28ac98d3700e50010280719410c96'
+                }
+            })
+        );
+
+        const responses = await Promise.all(requests);
+
+        const results = await Promise.all(responses.map(async response => {
+            if (!response.ok) {
+                throw new Error(`Network response was not ok for hotel code: ${response.url}`);
+            }
+            return response.json();
+        }));
+
+        const occupancies = results.reduce((acc, data) => {
+            const roomOccupancy = extractRoomOccupancy(data);
+            return { ...acc, ...roomOccupancy };
+        }, {});
+
+        res.status(200).json(occupancies);
+
+    } catch (error) {
+        res.status(500).send(error.message || 'Unknown error occurred');
+    }
+});
+
+
+const cache = new Map();
+const CACHE_EXPIRATION_TIME = 3600000;
+
+const fetchWithTimeout = (url, options, timeout = 10000) => {
+    return new Promise((resolve, reject) => {
+        const timer = setTimeout(() => reject(new Error('Request timed out')), timeout);
+
+        fetch(url, options)
+            .then(response => {
+                clearTimeout(timer);
+                return response.ok ? resolve(response.json()) : reject(new Error(`HTTP error! status: ${response.status}`));
+            })
+            .catch(reject);
+    });
+};
+
+app.post('/getPrice', async (req, res) => {
+    try {
+        const { start_date, end_date, max_nights, guests, room_types } = req.body;
+
+        if (!Array.isArray(hotels) || hotels.length === 0) {
+            return res.status(400).json({ message: 'Hotels should be a non-empty array' });
+        }
+
+        const fetchPromises = hotels.map(hotel => {
+            const cacheKey = `${hotel}_${start_date}_${end_date}_${max_nights}`;
+            const now = Date.now();
+            const cached = cache.get(cacheKey);
+
+            if (cached && (now - cached.timestamp < CACHE_EXPIRATION_TIME)) {
+                return Promise.resolve(cached.data);
+            }
+            const url = `https://ibe.tlintegration.com/ChannelDistributionApi/AvailabilityCalendar/room_type_availability?start_date=${start_date}&end_date=${end_date}&max_nights=${max_nights}&hotel=${hotel}&currency=RUB`;
+
+            return fetchWithTimeout(url, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json, text/plain, */*',
+                    'X-TravelLine-ApiKey': '4db28ac98d3700e50010280719410c96'
+                }
+            }).then(data => {
+                cache.set(cacheKey, { data, timestamp: now });
+                return data;
+            }).catch(error => {
+                console.error(`Error fetching data for hotel ${hotel}:`, error);
+                return null;
+            });
+        });
+
+        const results = await Promise.all(fetchPromises);
+        const validResults = results.filter(Boolean);
+
+        if (validResults.length === 0) {
+            return res.status(500).json({ message: 'No valid responses received' });
+        }
+        const formatNumber = (num) => num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+
+        const getMinPrice = (data, guests, roomTypes) => {
+            return data.reduce((result, item) => {
+                const hotelId = item.hotel;
+                const roomTypeAvailability = item.room_type_availability || [];
+                let minPrice = Infinity;
+
+                roomTypeAvailability.forEach(roomType => {
+                    const maxOccupancy = roomTypes[roomType.id_room_type];
+                    if (maxOccupancy === undefined || maxOccupancy < guests) return;
+
+                    let totalPrice = 0;
+                    let consecutiveDays = 0;
+
+                    if (roomType.availability_date.length < max_nights) return;
+
+                    roomType.availability_date.forEach((dateAvailability, index) => {
+                        if (dateAvailability.period.start_date === end_date) {
+                            totalPrice = 0;
+                            consecutiveDays = 0;
+                            return
+                        }
+
+                        if (dateAvailability.is_available) {
+                            totalPrice += dateAvailability.price.price_before_tax;
+                            consecutiveDays++;
+
+                            if (consecutiveDays > max_nights) {
+                                totalPrice -= roomType.availability_date[index - max_nights].price.price_before_tax;
+                                consecutiveDays--;
+                            }
+
+                            if (consecutiveDays === max_nights && totalPrice < minPrice) {
+                                minPrice = totalPrice;
+                            }
+                        } else {
+                            totalPrice = 0;
+                            consecutiveDays = 0;
+                        }
+                    });
+                });
+
+                result[hotelId] = minPrice === Infinity ? "" : formatNumber(minPrice);
+                return result;
+            }, {});
+        };
+
+        const combinedData = validResults.flat();
+        const minPrices = getMinPrice(combinedData, guests, room_types);
+
+        res.json(minPrices);
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
+});
+
+
 app.use(express.static(path.join(__dirname, 'dist')));
 
 const redirects =  [
