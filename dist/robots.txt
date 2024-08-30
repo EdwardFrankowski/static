@@ -1,5 +1,31 @@
 User-Agent: *
 Disallow: /_next/
+Disallow: /book-a-room
+Disallow: /booking
+Disallow: /tilda
+Disallow: /dopuslugi
+Disallow: /var2
+Disallow: /*?
+Disallow: *?
+
+User-Agent: Googlebot
+Disallow: /_next/
+Disallow: /book-a-room
+Disallow: /booking
+Disallow: /tilda
+Disallow: /dopuslugi
+Disallow: /var2
+Disallow: /*?
+Disallow: *?
+
+User-Agent: Yandex
+Disallow: /_next/
+Disallow: /book-a-room
+Disallow: /booking
+Disallow: /tilda
+Disallow: /dopuslugi
+Disallow: /var2
+Disallow: /*?
 Disallow: *?
 
 User-Agent: Yandex
