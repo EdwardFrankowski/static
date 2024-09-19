@@ -273,7 +273,7 @@ app.use(express.static(path.join(__dirname, 'dist')));
 const redirects =  [
     {
         source: "/_error",
-        destination: "/",
+        destination: "/404",
         permanent: true,
     },
     {
@@ -283,22 +283,22 @@ const redirects =  [
     },
     {
         source: "/contact",
-        destination: "/",
+        destination: "/404",
         permanent: true,
     },
     {
         source: "/contacts",
-        destination: "/",
+        destination: "/404",
         permanent: true,
     },
     {
         source: "/dogovor-bescontact",
-        destination: "/",
+        destination: "/non-contact-check-in",
         permanent: false,
     },
     {
         source: "/partners",
-        destination: "/",
+        destination: "/places-to-go",
         permanent: false,
     },
     {
@@ -572,7 +572,7 @@ app.use((req, res, next) => {
 });
 
 app.use((req, res) => {
-    res.redirect('/');
+    res.redirect('/404');
 });
 
 app.post('/send-transfer-message', async (req, res) => {
