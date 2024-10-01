@@ -541,6 +541,11 @@ const redirects =  [
         destination: "/hotels/spb/angliyskiy/",
         permanent: true,
     },
+    {
+        source: "/hotels/spb/angliyskiy/",
+        destination: "/hotels/spb/mariinsky/",
+        permanent: true,
+    },
 ]
 
 app.use((req, res, next) => {
@@ -554,7 +559,7 @@ app.use((req, res, next) => {
     switch (hotelId){
         case '20176': return res.redirect(301, `/hotels/spb/gostiniy-dvor?${queryParams}`);
         case '21668': return res.redirect(301, `/hotels/spb/old-nevskiy?${queryParams}`);
-        case '42043': return res.redirect(301, `/hotels/spb/angliyskiy?${queryParams}`);
+        case '42043': return res.redirect(301, `/hotels/spb/mariinsky?${queryParams}`);
         case '20776': return res.redirect(301, `/hotels/spb/griboedov?${queryParams}`);
         case '33783': return res.redirect(301, `/hotels/spb/sennaya-square?${queryParams}`);
         case '10970': return res.redirect(301, `/hotels/spb/ligovskiy?${queryParams}`);
