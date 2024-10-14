@@ -1,4 +1,5 @@
 User-Agent: *
+Disallow: /account/
 Disallow: /_next/
 Disallow: /book-a-room
 Disallow: /booking
@@ -9,6 +10,7 @@ Disallow: /*?
 Disallow: *?
 
 User-Agent: Googlebot
+Disallow: /account/
 Disallow: /_next/
 Disallow: /book-a-room
 Disallow: /booking
@@ -19,6 +21,7 @@ Disallow: /*?
 Disallow: *?
 
 User-Agent: Yandex
+Disallow: /account/
 Disallow: /_next/
 Disallow: /book-a-room
 Disallow: /booking
