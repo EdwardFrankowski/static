@@ -28,52 +28,96 @@ const utmMiddleware = (req, res, next) => {
 };
 app.use(utmMiddleware);
 
-const TELEGRAM_BOT_TOKEN = '7484491812:AAFj6wf3VQYoXy69UZMFtEu-DAc_rqOtsBw';
-const TELEGRAM_CHAT_ID = '-1001580200946';
 
-const getMessage = ({
-                        name,
-                        phone,
-                        from,
-                        to,
-                        date,
-                        time,
-                        childSeat,
-                        transport,
-                    }) =>
-    `
+const TELEGRAM_TRANSFER_BOT_TOKEN = '7484491812:AAFj6wf3VQYoXy69UZMFtEu-DAc_rqOtsBw';
+const TELEGRAM_TRANSFER_CHAT_ID = '-1001580200946';
+
+const TELEGRAM_INVESTOR_BOT_TOKEN = '8160507532:AAEy470RtHkMd2rklC3DtYqt4GexFlr6fnM';
+const TELEGRAM_INVESTOR_CHAT_ID = '-4674555139';
+
+const TRANSFER_TYPE = 'transfer'
+const INVESTOR_TYPE = 'investor'
+
+const getMessage = (type, data) => {
+    const baseUrl = "https://port-comfort.pro";
+    const templates = {
+        transfer: `
 Основная информация:
-ФИО: ${name}
-Телефон: ${phone}
-Откуда: ${from}
-Отель: ${to}
-Дата: ${date}
-Время: ${time}
-Детское кресло: ${childSeat}
-Машина: ${transport}
+ФИО: ${data.name}
+Телефон: ${data.phone}
+Откуда: ${data.from}
+Отель: ${data.to}
+Дата: ${data.date}
+Время: ${data.time}
+Детское кресло: ${data.childSeat}
+Машина: ${data.transport}
 
 Дополнительная:
-https://port-comfort.pro/transfer
+${baseUrl}/transfer
 UTM source: maps
 UTM medium: link
 UTM campaign: moyka
-`;
+`,
+        investor: `
+Основная информация:
+Имя: ${data.name}
+Телефон: ${data.phone}
 
-const sendTransferMessage = async (message) => {
+Дополнительная:
+${baseUrl}/become-owner/
+`,
+    };
+
+    return templates[type];
+};
+
+const sendMessage = async (message, token, id) => {
     const fetch = (await import('node-fetch')).default;
-    const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
-    const response = await fetch(url, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-            chat_id: TELEGRAM_CHAT_ID,
-            text: message,
-        }),
-    });
+    const url = `https://api.telegram.org/bot${token}/sendMessage`;
 
-    return response.status === 200;
+    try {
+        const response = await fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                chat_id: id,
+                text: message,
+            }),
+        });
+        return response.status === 200;
+    } catch (error) {
+        console.error("Telegram API error:", error);
+        return false;
+    }
+};
+
+const handleSendMessage = async (req, res, type, token, chatId) => {
+    try {
+        const data = req.body;
+        const message = getMessage(type, data);
+
+        const ok = await sendMessage(message, token, chatId);
+
+        if (ok) {
+            res.json({
+                status: "success",
+                message: "Message sent successfully",
+            });
+        } else {
+            res.status(500).json({
+                status: "error",
+                message: "Failed to send message",
+            });
+        }
+    } catch (error) {
+        console.error("Error sending message:", error);
+        res.status(500).json({
+            status: "error",
+            message: "Failed to send message",
+        });
+    }
 };
 
 
@@ -265,6 +309,26 @@ app.post('/getPostViews', async (req, res) => {
         console.error('Ошибка:', error);
         res.status(500).json({ error: 'Ошибка сервера' });
     }
+});
+
+
+app.post('/send-transfer-message', async (req, res) => {
+    await handleSendMessage(
+        req,
+        res,
+        TRANSFER_TYPE,
+        TELEGRAM_TRANSFER_BOT_TOKEN,
+        TELEGRAM_TRANSFER_CHAT_ID
+    );
+});
+app.post('/send-investor-message', async (req, res) => {
+    await handleSendMessage(
+        req,
+        res,
+        INVESTOR_TYPE,
+        TELEGRAM_INVESTOR_BOT_TOKEN,
+        TELEGRAM_INVESTOR_CHAT_ID
+    );
 });
 
 
@@ -626,33 +690,6 @@ app.use((req, res, next) => {
     res.status(404).sendFile(path.join(__dirname, 'dist', '404', 'index.html'));
 });
 
-app.post('/send-transfer-message', async (req, res) => {
-    try {
-        const data = req.body;
-
-        const message = getMessage(data);
-
-        const ok = await sendTransferMessage(message);
-
-        if (ok) {
-            res.json({
-                status: "success",
-                message: "Message sent successfully",
-            });
-        } else {
-            res.status(500).json({
-                status: "error",
-                message: "Failed to send message",
-            });
-        }
-    } catch (error) {
-        console.error("Error sending message:", error);
-        res.status(500).json({
-            status: "error",
-            message: "Failed to send message",
-        });
-    }
-});
 
 app.get('*', (req, res) => {
     const indexPath = path.join(__dirname, 'dist', 'index.html');
