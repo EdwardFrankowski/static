@@ -29,6 +29,19 @@ const utmMiddleware = (req, res, next) => {
 app.use(utmMiddleware);
 
 
+app.set('trust proxy', true);
+app.use((req, res, next) => {
+    if (req.headers.host.startsWith('www.')) {
+        const newHost = req.headers.host.slice(4);
+        const newUrl = `${req.protocol}://${newHost}${req.originalUrl}`;
+        res.redirect(301, newUrl);
+    } else {
+        next();
+    }
+});
+
+
+
 const TELEGRAM_TRANSFER_BOT_TOKEN = '7484491812:AAFj6wf3VQYoXy69UZMFtEu-DAc_rqOtsBw';
 const TELEGRAM_TRANSFER_CHAT_ID = '-1001580200946';
 
@@ -331,6 +344,14 @@ app.post('/send-investor-message', async (req, res) => {
     );
 });
 
+
+
+app.use((req, res, next) => {
+    if (req.url.startsWith('/404/')) {
+        return res.status(404).sendFile(path.join(__dirname, 'dist', '404', 'index.html'));
+    }
+    next();
+});
 
 app.use(express.static(path.join(__dirname, 'dist')));
 
