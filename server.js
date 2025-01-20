@@ -46,7 +46,7 @@ const TELEGRAM_TRANSFER_BOT_TOKEN = '7484491812:AAFj6wf3VQYoXy69UZMFtEu-DAc_rqOt
 const TELEGRAM_TRANSFER_CHAT_ID = '-1001580200946';
 
 const TELEGRAM_INVESTOR_BOT_TOKEN = '8160507532:AAEy470RtHkMd2rklC3DtYqt4GexFlr6fnM';
-const TELEGRAM_INVESTOR_CHAT_ID = '-4674555139';
+const TELEGRAM_INVESTOR_CHAT_ID = '-1002375162538';
 
 const TRANSFER_TYPE = 'transfer'
 const INVESTOR_TYPE = 'investor'
@@ -105,6 +105,44 @@ const sendMessage = async (message, token, id) => {
         return false;
     }
 };
+const createInvestorBitrixLead = async (name, phone) => {
+    try {
+        const bitrixUrl = 'https://inreit.bitrix24.ru/rest/15526/9zql0nw1y8314xyd/crm.lead.add';
+
+        const data = {
+            fields: {
+                TITLE: `Заявка от ${name}`,
+                NAME: name,
+                PHONE: [{ VALUE: phone, VALUE_TYPE: 'WORK' }],
+            },
+            params: { REGISTER_SONET_EVENT: 'Y' },
+        };
+
+        const response = await fetch(bitrixUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data),
+        });
+
+        if (!response.ok) {
+            throw new Error(`Ошибка Bitrix24: ${response.status} ${response.statusText}`);
+        }
+
+        const result = await response.json();
+
+        if (result.error) {
+            throw new Error(`Ошибка создания лида: ${result.error_description || 'Неизвестная ошибка'}`);
+        }
+
+        return { success: true, leadId: result.result };
+    } catch (error) {
+        console.error('Ошибка при отправке лида в Bitrix24:', error.message);
+
+        return { success: false, message: error.message };
+    }
+};
 
 const handleSendMessage = async (req, res, type, token, chatId) => {
     try {
@@ -112,6 +150,17 @@ const handleSendMessage = async (req, res, type, token, chatId) => {
         const message = getMessage(type, data);
 
         const ok = await sendMessage(message, token, chatId);
+
+        if (type === INVESTOR_TYPE) {
+            const leadResult = await createInvestorBitrixLead(data.name, data.phone);
+            if (!leadResult.success) {
+                console.error('Ошибка при добавлении лида в Bitrix24:', leadResult.message);
+                return res.status(500).json({
+                    status: "error",
+                    message: "Failed to send lead to Bitrix24",
+                });
+            }
+        }
 
         if (ok) {
             res.json({
