@@ -3,67 +3,7 @@ const path = require('path');
 const fs = require('fs');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
-const { port } = require('./config/env');
-const utmMiddleware = require('./middleware/utm.middleware');
-const { removeWWW, handleRedirects, handle404 } = require('./middleware/redirect.middleware');
-const messageRoutes = require('./routes/message.routes');
-const hotelRoutes = require('./routes/hotel.routes');
-const analyticsRoutes = require('./routes/analytics.routes');
-
-const app = express();
-
-app.set('trust proxy', true);
-
-app.use(removeWWW);
-app.use(handle404);
-app.use(handleRedirects);
-
-app.use(express.json());
-app.use(bodyParser.json());
-app.use(cookieParser());
-
-app.use(utmMiddleware);
-
-app.use(express.static(path.join(__dirname, '..', 'public', 'dist')));
-
-app.use('/api', messageRoutes);
-app.use('/api', hotelRoutes);
-app.use('/api', analyticsRoutes);
-
-
-app.use((req, res) => {
-    res.status(404).sendFile(path.join(__dirname, '..', 'public', 'dist', '404', 'index.html'));
-});
-
-app.get('*', (req, res) => {
-    const indexPath = path.join(__dirname, '..', 'public', 'dist', 'index.html');
-    fs.access(indexPath, fs.constants.F_OK, (err) => {
-        if (err) {
-            console.error('Index file not found:', err);
-            res.status(404).send('Index file not found');
-            return;
-        }
-        res.sendFile(indexPath);
-    });
-});
-
-
-app.listen(port, () => {
-    console.log(`Server is running on http://localhost:${port}`);
-});
-
-module.exports = app;
-
-
-/*
-
-const express = require('express');
-const path = require('path');
-const fs = require('fs');
-const bodyParser = require('body-parser');
-const cookieParser = require('cookie-parser');
 const multer = require('multer');
-
 
 require('dotenv').config();
 
@@ -79,8 +19,6 @@ if (missingVars.length > 0) {
 }
 
 const upload = multer({ storage: multer.memoryStorage() });
-
-
 
 
 const app = express();
@@ -120,7 +58,6 @@ app.use((req, res, next) => {
 });
 
 
-
 const CONFIG_TG = {
     transfer: {
         token: process.env.TRANSFER_TOKEN,
@@ -139,7 +76,6 @@ const CONFIG_TG = {
         hasMedia: true
     }
 };
-
 
 const getMessage = (type, data = {}) => {
     const baseUrl = "https://port-comfort.pro";
@@ -277,16 +213,6 @@ const createMessageHandler = (configKey) => async (req, res) => {
 };
 
 
-app.post('/send-transfer-message', createMessageHandler(CONFIG_TG.transfer.type));
-app.post('/send-investor-message', createMessageHandler(CONFIG_TG.investor.type));
-app.post('/send-non-contact-check-in-message', upload.array('files'), createMessageHandler(CONFIG_TG.nonContact.type));
-
-
-
-
-
-
-
 function extractRoomOccupancy(data) {
     const result = {};
 
@@ -301,14 +227,14 @@ function extractRoomOccupancy(data) {
 
 const hotels = ["10970", "20776", "20176", "21668", "42043", "27469", "33783", "27859", "32789"];
 
-app.get('/getRoomTypes', async (req, res) => {
+app.get('/api/getRoomTypes', async (req, res) => {
     try {
         const requests = hotels.map(hotelCode =>
             fetch(`https://ibe.tlintegration.com/ChannelDistributionApi/BookingForm/hotel_info?language=ru-ru&hotels[0].code=${hotelCode}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Accept': 'application/json, text/plain, *!/!*',
+                    'Accept': 'application/json, text/plain, */*',
                     'X-TravelLine-ApiKey': '4db28ac98d3700e50010280719410c96'
                 }
             })
@@ -352,7 +278,7 @@ const fetchWithTimeout = (url, options, timeout = 10000) => {
     });
 };
 
-app.post('/getPrice', async (req, res) => {
+app.post('/api/getPrice', async (req, res) => {
     try {
         const { start_date, end_date, max_nights, guests, room_types } = req.body;
 
@@ -374,7 +300,7 @@ app.post('/getPrice', async (req, res) => {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Accept': 'application/json, text/plain, *!/!*',
+                    'Accept': 'application/json, text/plain, */*',
                     'X-TravelLine-ApiKey': '4db28ac98d3700e50010280719410c96'
                 }
             }).then(data => {
@@ -450,7 +376,7 @@ app.post('/getPrice', async (req, res) => {
     }
 });
 
-app.post('/getPostViews', async (req, res) => {
+app.post('/api/getPostViews', async (req, res) => {
     const accessToken = 'y0_AgAAAAB2OV8jAAxaBAAAAAEPQlwTAAD-8ew_44lI8Z8xBGltN2IM2jTtBQ';
     const id = '83537836';
     const { goalNumber } = req.body;
@@ -476,6 +402,10 @@ app.post('/getPostViews', async (req, res) => {
         res.status(500).json({ error: 'Ошибка сервера' });
     }
 });
+
+app.post('/api/send-transfer-message', createMessageHandler(CONFIG_TG.transfer.type));
+app.post('/api/send-investor-message', createMessageHandler(CONFIG_TG.investor.type));
+app.post('/api/send-non-contact-check-in-message', upload.array('files'), createMessageHandler(CONFIG_TG.nonContact.type));
 
 
 app.use((req, res, next) => {
@@ -859,4 +789,3 @@ app.get('*', (req, res) => {
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
 });
-*/
