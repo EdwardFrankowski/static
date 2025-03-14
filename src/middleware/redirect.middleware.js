@@ -14,32 +14,41 @@ module.exports = {
 
     handleRedirects: (req, res, next) => {
         const requestedPath = req.originalUrl;
-        const normalizedPath = requestedPath.replace(/\/$/, ''); // Без слеша
-        const pathWithSlash = normalizedPath.endsWith('/') ? normalizedPath : `${normalizedPath}/`; // С слешем
-
+        const normalizedPath = requestedPath.replace(/\/$/, '');
+        const pathWithSlash = normalizedPath.endsWith('/') ? normalizedPath : `${normalizedPath}/`;
         const redirect = redirects.find(r =>
             r.source === normalizedPath || r.source === pathWithSlash
         );
 
+
+
         const url = new URL(req.originalUrl, `http://${req.headers.host}`);
         const hotelId = url.searchParams.get('hotel_id');
+
+        url.searchParams.delete('hotel_id');
         const queryParams = url.searchParams.toString();
 
         const hotelRedirects = {
-            '20176': `/hotels/spb/gostiniy-dvor?${queryParams}`,
-            '21668': `/hotels/spb/old-nevskiy?${queryParams}`,
-            '42043': `/hotels/spb/mariinsky?${queryParams}`,
-            '20776': `/hotels/spb/griboedov?${queryParams}`,
-            '33783': `/hotels/spb/sennaya-square?${queryParams}`,
-            '10970': `/hotels/spb/ligovskiy?${queryParams}`,
-            '27469': `/hotels/spb/moyka?${queryParams}`,
-            '27859': `/hotels/spb/smolnyy?${queryParams}`,
-            '32789': `/hotels/msk/pokrovka?${queryParams}`
+            '20176': `/hotels/spb/gostiniy-dvor`,
+            '21668': `/hotels/spb/old-nevskiy`,
+            '42043': `/hotels/spb/mariinsky`,
+            '20776': `/hotels/spb/griboedov`,
+            '33783': `/hotels/spb/sennaya-square`,
+            '10970': `/hotels/spb/ligovskiy`,
+            '27469': `/hotels/spb/moyka`,
+            '27859': `/hotels/spb/smolnyy`,
+            '32789': `/hotels/msk/pokrovka`
         };
 
         if (hotelId && hotelRedirects[hotelId]) {
-            return res.redirect(301, hotelRedirects[hotelId]);
+            const redirectUrl = queryParams
+                ? `${hotelRedirects[hotelId]}?${queryParams}`
+                : hotelRedirects[hotelId];
+            return res.redirect(301, redirectUrl);
         }
+
+
+
 
         if (redirect) {
             const destination = redirect.destination.endsWith('/')
